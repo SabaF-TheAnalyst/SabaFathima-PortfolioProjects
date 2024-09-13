@@ -43,12 +43,12 @@ from rolling_total;
 select company, sum(total_laid_off) from layoffs_staging2 
 group by company order by 2 desc;
 
--- my own code
+-- my version
 select company, year(`date`), sum(total_laid_off)
 over (partition by company, year(`date`) order by year(`date`)) as layoff_by_year
 from layoffs_staging2;
 
--- from youtube video
+-- alternate version
 select company, year(`date`), sum(total_laid_off)
 from layoffs_staging2
 group by company, year(`date`)
@@ -67,7 +67,7 @@ from company_year
 where years is not null;
 
 
--- code to get year wise info but based on rank like in the first year the greatest layoff, then the greatest layoff the the next year, so on
+-- code to get year wise info but based on rank
 with company_year (company, years, total_laid_off) as
 (
 select company, year(`date`), sum(total_laid_off)
@@ -97,17 +97,3 @@ where years is not null
 select * from company_year_rank
 where ranking <= 5;
 
-
-
-
--- testing
-with company_year (company, years, total_laid_off) as
-(
-select company, year(`date`), sum(total_laid_off)
-from layoffs_staging2
-group by company, year(`date`)
-)
-select *,
-dense_rank() over (partition by years order by total_laid_off desc) as ranking
-from company_year
-where years is not null;
